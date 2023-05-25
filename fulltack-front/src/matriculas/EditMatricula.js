@@ -5,15 +5,15 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 export default function EditMatricula() {
   let navigate = useNavigate();
 
-  const { id_matricula } = useParams();
+  const { id } = useParams();
 
   const [matricula, setMatricula] = useState({
-    id: "",
+    nombre_usuario: "",
     fecha_matricula: "",
-    id_curso: ""
+    nombre_curso: ""
   });
 
-  const { id, fecha_matricula, id_curso } = matricula;
+  const { nombre_usuario, fecha_matricula, nombre_curso } = matricula;
 
   const onInputChange = (e) => {
     // console.log(e.target.name);
@@ -26,32 +26,26 @@ export default function EditMatricula() {
 
   useEffect(() => {
     loadMatricula();
-    getDatos();
   }, []);
 
-  const getDatos = async () => {
-    let responseUsuarios = await axios.get("http://localhost:8080/users");
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    await axios.put(`http://localhost:8080/matricula/${id}`, matricula);
+    navigate("/home");
+  };
+
+  const loadMatricula = async () => {
+    let responseUsuarios = await axios.get(`http://localhost:8080/users`);
 
     if (responseUsuarios) {
       setUsuarios(responseUsuarios.data);
     }
 
-    let responseCursos = await axios.get("http://localhost:8080/cursos");
+    let responseCursos = await axios.get(`http://localhost:8080/cursos`);
 
     if (responseCursos) {
       setCursos(responseCursos.data);
     }
-  };
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    await axios.put(`http://localhost:8080/matricula/${id_matricula}`, matricula);
-    navigate("/home");
-  };
-
-  const loadMatricula = async () => {
-    const result = await axios.get(`http://localhost:8080/matricula/${id_matricula}`, matricula);
-    setMatricula(result.data);
   };
 
   return (
@@ -63,8 +57,13 @@ export default function EditMatricula() {
           <form onSubmit={(e) => onSubmit(e)}>
             <div className="mb-3">
             <label htmlFor="id" className="form-label">
-                Id del Usuario
-                <select name="id" onChange={(e) => onInputChange(e)}>
+                Nombre del Usuario
+            </label>
+                <select 
+                placeholder="Introduce el nombre del usuario"
+                name="id"
+                onChange={(e) => onInputChange(e)}
+                >
                   <option value=""></option>
                   {usuarios.map((user, index) => {
                     return (
@@ -75,7 +74,6 @@ export default function EditMatricula() {
                     );
                   })}
                 </select>
-              </label>
             </div>
             <div className="mb-3">
               <label htmlFor="fecha_matricula" className="form-label">
@@ -92,9 +90,8 @@ export default function EditMatricula() {
             </div>
             <div className="mb-3">
               <label htmlFor="id_curso" className="form-label">
-                Id del curso
+                Nombre del curso
               </label>
-              
               <select
                 placeholder="Introduce la id del curso"
                 name="id_curso"
